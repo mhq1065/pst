@@ -15,4 +15,4 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', 'FileController@index');
-
+Route::post('/upload', 'FileController@uploadFile');

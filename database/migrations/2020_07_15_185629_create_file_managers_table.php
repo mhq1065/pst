@@ -18,6 +18,7 @@ class CreateFileManagersTable extends Migration
             $table->string('pwd')->comment('口令');
             $table->string('fileName')->comment('文件名');
             $table->integer('size')->comment('文件大小');
+            $table->string('fileNameMd')->comment('存储文件名');
             $table->timestamps();
             $table->softDeletes();
         });

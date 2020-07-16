@@ -4,16 +4,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Home</title>
     <link rel="stylesheet" href="{{mix('css/home.css')}}">
-    <script src="{{ mix('js/home.js') }}"></script>
 </head>
 
 <body>
     <div class="container">
         <!-- Content here -->
-        <button type="button" class="btn btn-primary">上传</button>
+        <div id="app">
+        </div>
         <table class="table table-striped table-hover">
             <thead>
                 <tr>
@@ -40,6 +41,7 @@
         </table>
 
     </div>
+    <script src="{{ mix('js/home.js') }}"></script>
 </body>
 
 </html>
