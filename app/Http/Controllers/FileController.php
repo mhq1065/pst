@@ -27,9 +27,23 @@ class FileController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function downloadFile($id)
+    public function download(FileManager $filemanager, Request $request, $id)
     {
         //
+        global $file;
+        $pwd = $request->input('pwd');
+        $data = $filemanager->where('id', '=', $id)->get()->toArray();
+        $fileNameMd = $data[0]['fileNameMd'];
+        if ($data[0]['pwd'] != $pwd) {
+
+            return ['retcode' => -1];
+        }
+        $file = public_path() . Storage::url($fileNameMd);
+        // return ['url' => $file];
+        // return response()->download($file, $data[0]['fileName'], $headers);
+        return response()->streamDownload(function () {
+            echo file_get_contents($GLOBALS['file']);
+        });
     }
 
     /**
@@ -104,9 +118,12 @@ class FileController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(FileManager $filemanager)
     {
         //
+        $data = $filemanager->get(['id', 'fileName', 'size']);
+        $fileList = $data->toArray();
+        return $fileList;
     }
 
     /**
