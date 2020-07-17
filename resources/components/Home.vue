@@ -86,14 +86,6 @@
                                     {{ fileName }}
                                 </label>
                             </div>
-                            <div class="input-group-append">
-                                <span
-                                    class="input-group-text"
-                                    @click.prevent="uploadFile"
-                                >
-                                    上传
-                                </span>
-                            </div>
                         </div>
                         <!-- 新文件名 -->
                         <div class="input-group mb-3">
@@ -124,6 +116,13 @@
                                 v-model="Modal.pwd"
                                 placeholder="下载/删除口令"
                             />
+                        </div>
+                        <!-- 进度条 -->
+                        <div class="progress">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
+                                aria-valuenow="60" aria-valuemin="0" aria-valuemax="100"
+                                :style="Modal.uploadProgress">
+                            </div>
                         </div>
                     </div>
                     <!-- 删除 -->
@@ -199,6 +198,9 @@ export default {
                 size: 0,
                 ModalStyle: {
                     display: "none"
+                },
+                uploadProgress:{
+                    width:'0%'
                 }
             }
         };
@@ -234,6 +236,10 @@ export default {
             formdata.append("pwd", this.Modal.pwd);
             formdata.append("file", this.file);
             formdata.append("newfilename", this.newFileName);
+            if(this.file.size>20971500){
+                alert("请选择小于20M的文件")
+                return;
+            }
             // console.log(formdata);
             this.$ajax({
                 method: "post",
@@ -241,10 +247,26 @@ export default {
                 data: formdata,
                 headers: {
                     "Content-Type": "multipart/form-data;charset=UTF-8"
+                },
+                onUploadProgress: progressEvent => {
+                    let complete = (progressEvent.loaded / progressEvent.total * 100 | 0) + '%'
+                    this.Modal.uploadProgress.width = complete
+                    console.log(this.Modal.uploadProgress.width)
                 }
             }).then(res => {
+                alert("上传成功");
+                this.clearFile();
                 this.freshList();
                 this.hideModal();
+            }).catch(err=>{
+                console.log('err',err);
+                console.log('error code',err.response.status);
+                this.clearFile()
+                if(err.response.status==413){
+                    alert("上传失败,文件过大");
+                }else{
+                    alrt("上传失败，请检查网络连接")
+                }
             });
         },
         // 下载文件
@@ -272,6 +294,9 @@ export default {
                 window.URL.revokeObjectURL(objectUrl);
                 this.clearModal();
                 // window.open(res.data.url);
+            }).catch(err=>{
+                console.log(err);
+                alert("密码错误")
             });
         },
         // 删除文件
@@ -283,6 +308,7 @@ export default {
                     pwd: this.Modal.pwd
                 }
             }).then(res => {
+                alert("删除成功");
                 this.freshList();
                 this.hideModal();
             });
@@ -310,8 +336,17 @@ export default {
                 size: 0,
                 ModalStyle: {
                     display: "none"
+                },
+                uploadProgress:{
+                    width:"0"
                 }
             };
+        },
+        // 清空文件
+        clearFile(){
+            this.fileName="Choose file";
+            this.newFileName= "";
+            this.file= {};
         },
 
         //防止滚动穿透

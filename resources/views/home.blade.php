@@ -14,7 +14,6 @@
     <div class="container">
         <!-- Content here -->
         <div id="app"></div>
-
     </div>
     <script src="{{ mix('js/home.js') }}"></script>
 </body>

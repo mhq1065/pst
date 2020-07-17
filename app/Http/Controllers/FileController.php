@@ -60,12 +60,12 @@ class FileController extends Controller
         $password = $request->input('pwd');
         // 判断文件合法性
         if (!$file->isValid()) {
-            return '文件不合法';
+            return ['retcode'=>-1,'msg'=>$file->getErrorMessage()];
         }
         // 判断文件大小是否超过10M
         $tmpFile = $file->getRealPath();
-        if (filesize($tmpFile) >= 8192000) {
-            return '文件大小超过10M';
+        if (filesize($tmpFile) > 20971500) {
+            return ['retcode'=>-1,'msg'=>'文件过大'];
         }
         // 4.是否是通过http请求表单提交的文件
         if (!is_uploaded_file($tmpFile)) {
