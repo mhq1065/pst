@@ -150,13 +150,25 @@ class FileController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * 删除文件.
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(FileManager $filemanager, Request $request, $id)
     {
         //
+
+        $all = $request->all();
+        dump($all);
+        $pwd = $request->input('pwd');
+        $data = $filemanager->where('id', '=', $id)->get()->toArray();
+        $fileNameMd = $data[0]['fileNameMd'];
+        if ($data[0]['pwd'] != $pwd) {
+            return ['retcode' => -1, 'pwd' => $data[0]['pwd']];
+        }
+        Storage::disk('public')->delete($fileNameMd);
+        $filemanager->where('id', $id)->delete();
+        return ['retcode' => 0];
     }
 }

@@ -27,7 +27,11 @@
                         </button>
                     </td>
                     <td>
-                        <button type="button" class="btn btn-danger">
+                        <button
+                            type="button"
+                            class="btn btn-danger"
+                            @click="showDeleteModal(index)"
+                        >
                             删除
                         </button>
                     </td>
@@ -60,12 +64,12 @@
                         <input
                             type="password"
                             class="form-control"
-                            v-model="Modal.downpwd"
+                            v-model="Modal.pwd"
                             placeholder="下载/删除口令"
                         />
                     </div>
                     <!-- 上传 -->
-                    <div class="modal-body" v-else>
+                    <div class="modal-body" v-else-if="Modal.type == '上传'">
                         <!-- 文件选择 -->
                         <div class="input-group mb-3">
                             <div class="custom-file">
@@ -117,10 +121,22 @@
                             <input
                                 type="password"
                                 class="form-control"
-                                v-model="pwd"
+                                v-model="Modal.pwd"
                                 placeholder="下载/删除口令"
                             />
                         </div>
+                    </div>
+                    <!-- 删除 -->
+                    <div class="modal-body" v-else>
+                        <p>文件名：{{ Modal.FileName }}</p>
+                        <p>大小：{{ Modal.size }}</p>
+                        <input
+                            type="password"
+                            class="form-control"
+                            v-model="Modal.pwd"
+                            placeholder="下载/删除口令"
+                        />
+                        <small>删除操作不可逆，请谨慎操作</small>
                     </div>
                     <!-- Modal foot -->
                     <div class="modal-footer">
@@ -135,12 +151,21 @@
                         </button>
                         <!-- 上传 -->
                         <button
-                            v-else
+                            v-else-if="Modal.type == '上传'"
                             type="button"
                             class="btn btn-primary"
                             @click.prevent="uploadFile"
                         >
                             上传
+                        </button>
+                        <!-- 删除 -->
+                        <button
+                            v-else
+                            type="button"
+                            class="btn btn-danger"
+                            @click.prevent="deleteFile"
+                        >
+                            删除
                         </button>
                     </div>
                 </div>
@@ -166,10 +191,9 @@ export default {
             fileName: "Choose file",
             newFileName: "",
             file: {},
-            pwd: "",
             Modal: {
                 type: "上传",
-                downpwd: "",
+                pwd: "",
                 id: 0,
                 FileName: "",
                 size: 0,
@@ -195,6 +219,7 @@ export default {
                 this.FileList = res.data;
             });
         },
+
         // 选择上传文件，加载参数
         handleFileChange(event) {
             console.log("选择上传文件", event.target.files);
@@ -206,7 +231,7 @@ export default {
         uploadFile() {
             console.log("start uploadFile");
             let formdata = new FormData();
-            formdata.append("pwd", this.pwd);
+            formdata.append("pwd", this.Modal.pwd);
             formdata.append("file", this.file);
             formdata.append("newfilename", this.newFileName);
             // console.log(formdata);
@@ -222,37 +247,13 @@ export default {
                 this.hideModal();
             });
         },
-        // 显示=弹窗
-        showModal() {
-            this.Modal.ModalStyle.display = "inherit";
-            this.fixedBody();
-        },
-        // 隐藏弹窗
-        hideModal() {
-            console.log("hide Modal");
-            this.Modal.ModalStyle.display = "none";
-            this.clearModal();
-            this.looseBody();
-        },
-        clearModal() {
-            this.Modal = {
-                type: "下载",
-                id: 0,
-                FileName: "",
-                downpwd: "",
-                size: 0,
-                ModalStyle: {
-                    display: "none"
-                }
-            };
-        },
-        // 下载
+        // 下载文件
         downloadFile() {
             this.$ajax({
                 url: `download/${this.Modal.id}`,
                 method: "post",
                 data: {
-                    pwd: this.Modal.downpwd
+                    pwd: this.Modal.pwd
                 },
                 responseType: "blob"
             }).then(res => {
@@ -273,6 +274,45 @@ export default {
                 // window.open(res.data.url);
             });
         },
+        // 删除文件
+        deleteFile() {
+            this.$ajax({
+                method: "delete",
+                url: `/files/${this.Modal.id}`,
+                data: {
+                    pwd: this.Modal.pwd
+                }
+            }).then(res => {
+                this.freshList();
+                this.hideModal();
+            });
+        },
+
+        // 显示弹窗
+        showModal() {
+            this.Modal.ModalStyle.display = "inherit";
+            this.fixedBody();
+        },
+        // 隐藏弹窗
+        hideModal() {
+            console.log("hide Modal");
+            this.Modal.ModalStyle.display = "none";
+            this.clearModal();
+            this.looseBody();
+        },
+        // 清空Modal
+        clearModal() {
+            this.Modal = {
+                type: "下载",
+                id: 0,
+                FileName: "",
+                pwd: "",
+                size: 0,
+                ModalStyle: {
+                    display: "none"
+                }
+            };
+        },
 
         //防止滚动穿透
         //打开模态框前调用
@@ -285,7 +325,7 @@ export default {
             var body = document.body;
             body.className = "";
         },
-
+        //  显示上传弹窗
         showUploadModal() {
             this.showModal();
             this.Modal.type = "上传";
@@ -294,6 +334,14 @@ export default {
         showDownModal(id) {
             this.showModal();
             this.Modal.type = "下载";
+            this.Modal.FileName = this.FileList[id].fileName;
+            this.Modal.size = this.FileList[id].size;
+            this.Modal.id = this.FileList[id].id;
+        },
+        // 显示删除弹窗
+        showDeleteModal(id) {
+            this.showModal();
+            this.Modal.type = "删除";
             this.Modal.FileName = this.FileList[id].fileName;
             this.Modal.size = this.FileList[id].size;
             this.Modal.id = this.FileList[id].id;

@@ -2064,6 +2064,31 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "app",
   data: function data() {
@@ -2073,10 +2098,9 @@ __webpack_require__.r(__webpack_exports__);
       fileName: "Choose file",
       newFileName: "",
       file: {},
-      pwd: "",
       Modal: {
         type: "上传",
-        downpwd: "",
+        pwd: "",
         id: 0,
         FileName: "",
         size: 0,
@@ -2117,7 +2141,7 @@ __webpack_require__.r(__webpack_exports__);
 
       console.log("start uploadFile");
       var formdata = new FormData();
-      formdata.append("pwd", this.pwd);
+      formdata.append("pwd", this.Modal.pwd);
       formdata.append("file", this.file);
       formdata.append("newfilename", this.newFileName); // console.log(formdata);
 
@@ -2134,31 +2158,7 @@ __webpack_require__.r(__webpack_exports__);
         _this2.hideModal();
       });
     },
-    // 显示=弹窗
-    showModal: function showModal() {
-      this.Modal.ModalStyle.display = "inherit";
-      this.fixedBody();
-    },
-    // 隐藏弹窗
-    hideModal: function hideModal() {
-      console.log("hide Modal");
-      this.Modal.ModalStyle.display = "none";
-      this.clearModal();
-      this.looseBody();
-    },
-    clearModal: function clearModal() {
-      this.Modal = {
-        type: "下载",
-        id: 0,
-        FileName: "",
-        downpwd: "",
-        size: 0,
-        ModalStyle: {
-          display: "none"
-        }
-      };
-    },
-    // 下载
+    // 下载文件
     downloadFile: function downloadFile() {
       var _this3 = this;
 
@@ -2166,7 +2166,7 @@ __webpack_require__.r(__webpack_exports__);
         url: "download/".concat(this.Modal.id),
         method: "post",
         data: {
-          pwd: this.Modal.downpwd
+          pwd: this.Modal.pwd
         },
         responseType: "blob"
       }).then(function (res) {
@@ -2190,6 +2190,47 @@ __webpack_require__.r(__webpack_exports__);
 
       });
     },
+    // 删除文件
+    deleteFile: function deleteFile() {
+      var _this4 = this;
+
+      this.$ajax({
+        method: "delete",
+        url: "/files/".concat(this.Modal.id),
+        data: {
+          pwd: this.Modal.pwd
+        }
+      }).then(function (res) {
+        _this4.freshList();
+
+        _this4.hideModal();
+      });
+    },
+    // 显示弹窗
+    showModal: function showModal() {
+      this.Modal.ModalStyle.display = "inherit";
+      this.fixedBody();
+    },
+    // 隐藏弹窗
+    hideModal: function hideModal() {
+      console.log("hide Modal");
+      this.Modal.ModalStyle.display = "none";
+      this.clearModal();
+      this.looseBody();
+    },
+    // 清空Modal
+    clearModal: function clearModal() {
+      this.Modal = {
+        type: "下载",
+        id: 0,
+        FileName: "",
+        pwd: "",
+        size: 0,
+        ModalStyle: {
+          display: "none"
+        }
+      };
+    },
     //防止滚动穿透
     //打开模态框前调用
     fixedBody: function fixedBody() {
@@ -2201,6 +2242,7 @@ __webpack_require__.r(__webpack_exports__);
       var body = document.body;
       body.className = "";
     },
+    //  显示上传弹窗
     showUploadModal: function showUploadModal() {
       this.showModal();
       this.Modal.type = "上传";
@@ -2209,6 +2251,14 @@ __webpack_require__.r(__webpack_exports__);
     showDownModal: function showDownModal(id) {
       this.showModal();
       this.Modal.type = "下载";
+      this.Modal.FileName = this.FileList[id].fileName;
+      this.Modal.size = this.FileList[id].size;
+      this.Modal.id = this.FileList[id].id;
+    },
+    // 显示删除弹窗
+    showDeleteModal: function showDeleteModal(id) {
+      this.showModal();
+      this.Modal.type = "删除";
       this.Modal.FileName = this.FileList[id].fileName;
       this.Modal.size = this.FileList[id].size;
       this.Modal.id = this.FileList[id].id;
@@ -2739,7 +2789,21 @@ var render = function() {
               )
             ]),
             _vm._v(" "),
-            _vm._m(1, true)
+            _c("td", [
+              _c(
+                "button",
+                {
+                  staticClass: "btn btn-danger",
+                  attrs: { type: "button" },
+                  on: {
+                    click: function($event) {
+                      return _vm.showDeleteModal(index)
+                    }
+                  }
+                },
+                [_vm._v("\n                        删除\n                    ")]
+              )
+            ])
           ])
         }),
         0
@@ -2795,24 +2859,25 @@ var render = function() {
                       {
                         name: "model",
                         rawName: "v-model",
-                        value: _vm.Modal.downpwd,
-                        expression: "Modal.downpwd"
+                        value: _vm.Modal.pwd,
+                        expression: "Modal.pwd"
                       }
                     ],
                     staticClass: "form-control",
                     attrs: { type: "password", placeholder: "下载/删除口令" },
-                    domProps: { value: _vm.Modal.downpwd },
+                    domProps: { value: _vm.Modal.pwd },
                     on: {
                       input: function($event) {
                         if ($event.target.composing) {
                           return
                         }
-                        _vm.$set(_vm.Modal, "downpwd", $event.target.value)
+                        _vm.$set(_vm.Modal, "pwd", $event.target.value)
                       }
                     }
                   })
                 ])
-              : _c("div", { staticClass: "modal-body" }, [
+              : _vm.Modal.type == "上传"
+              ? _c("div", { staticClass: "modal-body" }, [
                   _c("div", { staticClass: "input-group mb-3" }, [
                     _c("div", { staticClass: "custom-file" }, [
                       _c("input", {
@@ -2863,7 +2928,7 @@ var render = function() {
                   ]),
                   _vm._v(" "),
                   _c("div", { staticClass: "input-group mb-3" }, [
-                    _vm._m(2),
+                    _vm._m(1),
                     _vm._v(" "),
                     _c("input", {
                       directives: [
@@ -2893,30 +2958,59 @@ var render = function() {
                   ]),
                   _vm._v(" "),
                   _c("div", { staticClass: "form-group" }, [
-                    _vm._m(3),
+                    _vm._m(2),
                     _vm._v(" "),
                     _c("input", {
                       directives: [
                         {
                           name: "model",
                           rawName: "v-model",
-                          value: _vm.pwd,
-                          expression: "pwd"
+                          value: _vm.Modal.pwd,
+                          expression: "Modal.pwd"
                         }
                       ],
                       staticClass: "form-control",
                       attrs: { type: "password", placeholder: "下载/删除口令" },
-                      domProps: { value: _vm.pwd },
+                      domProps: { value: _vm.Modal.pwd },
                       on: {
                         input: function($event) {
                           if ($event.target.composing) {
                             return
                           }
-                          _vm.pwd = $event.target.value
+                          _vm.$set(_vm.Modal, "pwd", $event.target.value)
                         }
                       }
                     })
                   ])
+                ])
+              : _c("div", { staticClass: "modal-body" }, [
+                  _c("p", [_vm._v("文件名：" + _vm._s(_vm.Modal.FileName))]),
+                  _vm._v(" "),
+                  _c("p", [_vm._v("大小：" + _vm._s(_vm.Modal.size))]),
+                  _vm._v(" "),
+                  _c("input", {
+                    directives: [
+                      {
+                        name: "model",
+                        rawName: "v-model",
+                        value: _vm.Modal.pwd,
+                        expression: "Modal.pwd"
+                      }
+                    ],
+                    staticClass: "form-control",
+                    attrs: { type: "password", placeholder: "下载/删除口令" },
+                    domProps: { value: _vm.Modal.pwd },
+                    on: {
+                      input: function($event) {
+                        if ($event.target.composing) {
+                          return
+                        }
+                        _vm.$set(_vm.Modal, "pwd", $event.target.value)
+                      }
+                    }
+                  }),
+                  _vm._v(" "),
+                  _c("small", [_vm._v("删除操作不可逆，请谨慎操作")])
                 ]),
             _vm._v(" "),
             _c("div", { staticClass: "modal-footer" }, [
@@ -2939,7 +3033,8 @@ var render = function() {
                       )
                     ]
                   )
-                : _c(
+                : _vm.Modal.type == "上传"
+                ? _c(
                     "button",
                     {
                       staticClass: "btn btn-primary",
@@ -2954,6 +3049,24 @@ var render = function() {
                     [
                       _vm._v(
                         "\n                        上传\n                    "
+                      )
+                    ]
+                  )
+                : _c(
+                    "button",
+                    {
+                      staticClass: "btn btn-danger",
+                      attrs: { type: "button" },
+                      on: {
+                        click: function($event) {
+                          $event.preventDefault()
+                          return _vm.deleteFile($event)
+                        }
+                      }
+                    },
+                    [
+                      _vm._v(
+                        "\n                        删除\n                    "
                       )
                     ]
                   )
@@ -2992,18 +3105,6 @@ var staticRenderFns = [
         _vm._v(" "),
         _c("th")
       ])
-    ])
-  },
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("td", [
-      _c(
-        "button",
-        { staticClass: "btn btn-danger", attrs: { type: "button" } },
-        [_vm._v("\n                        删除\n                    ")]
-      )
     ])
   },
   function() {
