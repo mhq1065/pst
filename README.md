@@ -1,7 +1,7 @@
 # pst
 ## 用途
 
-收到vc和打印店病毒启发，花了两天写了这个简易下载站，可以在有网络/校园网络的地方部署使用
+受到vc和打印店病毒启发，花了两天写了这个简易下载站，可以在有网络/校园网络的地方部署使用
 
 ## 已完成功能
 
@@ -26,11 +26,11 @@
 
 - composer install
 - php artisan key:generate
-- php artisan migrate:run
+- php artisan migrate
 - php artisan storage:link
-- php artisan serve
 - npm install
 - npm run dev
+- php artisan serve
 
 
 ## 部署
